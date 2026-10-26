@@ -1,0 +1,354 @@
+[
+  {
+    "_id": {
+      "$oid": "6ad2200c0003000000000001"
+    },
+    "StudentId": {
+      "$oid": "6ad21fd00002000000000001"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Elopement",
+    "Code": "E",
+    "Description": "Leaves assigned area without permission",
+    "Color": "#E4572E",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:01:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:01:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad220480003000000000002"
+    },
+    "StudentId": {
+      "$oid": "6ad21fd00002000000000001"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Vocal outburst",
+    "Code": "V",
+    "Description": "Yelling or screaming above conversational volume",
+    "Color": "#F3A712",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:02:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:02:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad220840003000000000003"
+    },
+    "StudentId": {
+      "$oid": "6ad21fd00002000000000001"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Task refusal",
+    "Code": "R",
+    "Description": "Says \"no\" or pushes materials away when given a task",
+    "Color": "#7B61FF",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:03:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:03:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad220c00003000000000004"
+    },
+    "StudentId": {
+      "$oid": "6ad21fd00002000000000001"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Hand raise",
+    "Code": "H",
+    "Description": "Raises hand to get attention (replacement behavior)",
+    "Color": "#2E9E5B",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:04:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:04:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad222640003000000000005"
+    },
+    "StudentId": {
+      "$oid": "6ad222280002000000000002"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Aggression",
+    "Code": "A",
+    "Description": "Hitting, kicking, or pushing peers or staff",
+    "Color": "#E4572E",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:11:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:11:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad222a00003000000000006"
+    },
+    "StudentId": {
+      "$oid": "6ad222280002000000000002"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Off-task",
+    "Code": "O",
+    "Description": "Not engaged with assigned task for 10+ seconds",
+    "Color": "#F3A712",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:12:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:12:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad222dc0003000000000007"
+    },
+    "StudentId": {
+      "$oid": "6ad222280002000000000002"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Asks for break",
+    "Code": "B",
+    "Description": "Uses break card or says \"break\" (replacement behavior)",
+    "Color": "#2E9E5B",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:13:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:13:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad224bc0003000000000008"
+    },
+    "StudentId": {
+      "$oid": "6ad224800002000000000003"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Out of seat",
+    "Code": "S",
+    "Description": "Leaves seat during seated work",
+    "Color": "#F3A712",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:21:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:21:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad224f80003000000000009"
+    },
+    "StudentId": {
+      "$oid": "6ad224800002000000000003"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Mand (request)",
+    "Code": "M",
+    "Description": "Requests an item or activity using words or AAC",
+    "Color": "#2E9E5B",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:22:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:22:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad22534000300000000000a"
+    },
+    "StudentId": {
+      "$oid": "6ad224800002000000000003"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "Name": "Crying",
+    "Code": "C",
+    "Description": "Crying lasting 5+ seconds",
+    "Color": "#3B82F6",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:23:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:23:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad22714000300000000000b"
+    },
+    "StudentId": {
+      "$oid": "6ad226d80002000000000004"
+    },
+    "UserId": {
+      "$oid": "6ad0ea700001000000000002"
+    },
+    "Name": "Asks for help",
+    "Code": "H",
+    "Description": "Says \"help please\" or uses help card",
+    "Color": "#2E9E5B",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:31:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:31:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad22750000300000000000c"
+    },
+    "StudentId": {
+      "$oid": "6ad226d80002000000000004"
+    },
+    "UserId": {
+      "$oid": "6ad0ea700001000000000002"
+    },
+    "Name": "Property destruction",
+    "Code": "D",
+    "Description": "Tearing, throwing, or breaking materials",
+    "Color": "#E4572E",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:32:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:32:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad2278c000300000000000d"
+    },
+    "StudentId": {
+      "$oid": "6ad226d80002000000000004"
+    },
+    "UserId": {
+      "$oid": "6ad0ea700001000000000002"
+    },
+    "Name": "Off-task",
+    "Code": "O",
+    "Description": "Not engaged with assigned task for 10+ seconds",
+    "Color": "#F3A712",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:33:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:33:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad2296c000300000000000e"
+    },
+    "StudentId": {
+      "$oid": "6ad229300002000000000005"
+    },
+    "UserId": {
+      "$oid": "6ad0f8800001000000000003"
+    },
+    "Name": "Task refusal",
+    "Code": "R",
+    "Description": "Refuses homework task after one prompt",
+    "Color": "#7B61FF",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:41:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:41:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad229a8000300000000000f"
+    },
+    "StudentId": {
+      "$oid": "6ad229300002000000000005"
+    },
+    "UserId": {
+      "$oid": "6ad0f8800001000000000003"
+    },
+    "Name": "Independent work",
+    "Code": "I",
+    "Description": "Completes a step without prompting",
+    "Color": "#2E9E5B",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:42:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:42:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad229e40003000000000010"
+    },
+    "StudentId": {
+      "$oid": "6ad229300002000000000005"
+    },
+    "UserId": {
+      "$oid": "6ad0f8800001000000000003"
+    },
+    "Name": "Vocal outburst",
+    "Code": "V",
+    "Description": "Yelling or screaming above conversational volume",
+    "Color": "#F3A712",
+    "IsArchived": false,
+    "DateCreated": {
+      "$date": "2026-10-16T13:43:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-16T13:43:00.000Z"
+    }
+  }
+]

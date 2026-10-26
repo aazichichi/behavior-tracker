@@ -1,0 +1,132 @@
+[
+  {
+    "_id": {
+      "$oid": "6ad614500004000000000001"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "StudentId": {
+      "$oid": "6ad21fd00002000000000001"
+    },
+    "StartTime": {
+      "$date": "2026-10-19T13:00:00.000Z"
+    },
+    "EndTime": {
+      "$date": "2026-10-19T13:30:00.000Z"
+    },
+    "IntervalSeconds": 120,
+    "Status": "ended",
+    "Notes": "Morning reading block.",
+    "DateCreated": {
+      "$date": "2026-10-19T13:00:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-19T13:30:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad765d00004000000000002"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "StudentId": {
+      "$oid": "6ad21fd00002000000000001"
+    },
+    "StartTime": {
+      "$date": "2026-10-20T13:00:00.000Z"
+    },
+    "EndTime": {
+      "$date": "2026-10-20T13:20:00.000Z"
+    },
+    "IntervalSeconds": 120,
+    "Status": "ended",
+    "Notes": "Math centers. Fewer outbursts after break card reminder.",
+    "DateCreated": {
+      "$date": "2026-10-20T13:00:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-20T13:20:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad788f80004000000000003"
+    },
+    "UserId": {
+      "$oid": "6ad0dc600001000000000001"
+    },
+    "StudentId": {
+      "$oid": "6ad222280002000000000002"
+    },
+    "StartTime": {
+      "$date": "2026-10-20T15:30:00.000Z"
+    },
+    "EndTime": {
+      "$date": "2026-10-20T15:54:00.000Z"
+    },
+    "IntervalSeconds": 120,
+    "Status": "ended",
+    "Notes": "Writing activity.",
+    "DateCreated": {
+      "$date": "2026-10-20T15:30:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-20T15:54:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad8c5600004000000000004"
+    },
+    "UserId": {
+      "$oid": "6ad0ea700001000000000002"
+    },
+    "StudentId": {
+      "$oid": "6ad226d80002000000000004"
+    },
+    "StartTime": {
+      "$date": "2026-10-21T14:00:00.000Z"
+    },
+    "EndTime": {
+      "$date": "2026-10-21T14:16:00.000Z"
+    },
+    "IntervalSeconds": 120,
+    "Status": "ended",
+    "Notes": "Small group art.",
+    "DateCreated": {
+      "$date": "2026-10-21T14:00:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-21T14:16:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad927d00004000000000005"
+    },
+    "UserId": {
+      "$oid": "6ad0f8800001000000000003"
+    },
+    "StudentId": {
+      "$oid": "6ad229300002000000000005"
+    },
+    "StartTime": {
+      "$date": "2026-10-21T21:00:00.000Z"
+    },
+    "EndTime": {
+      "$date": "2026-10-21T21:14:00.000Z"
+    },
+    "IntervalSeconds": 120,
+    "Status": "ended",
+    "Notes": "Homework at home.",
+    "DateCreated": {
+      "$date": "2026-10-21T21:00:00.000Z"
+    },
+    "DateUpdated": {
+      "$date": "2026-10-21T21:14:00.000Z"
+    }
+  }
+]
