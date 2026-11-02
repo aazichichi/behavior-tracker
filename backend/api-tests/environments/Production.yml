@@ -1,0 +1,9 @@
+# The team API on the droplet
+name: Production
+variables:
+  - name: baseURL
+    value: https://mernbehaviortracker.xyz:5000
+  - name: login
+    value: jrivera
+  - name: password
+    value: Password123!

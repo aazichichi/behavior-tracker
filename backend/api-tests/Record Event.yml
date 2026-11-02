@@ -1,0 +1,40 @@
+info:
+  name: Record Event
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: "{{baseURL}}/api/sessions/{{sessionId}}/events"
+  body:
+    type: json
+    data: |-
+      {
+        "behaviorId": "{{behaviorId}}"
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 201 Created", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("is placed in an interval", function () {
+          expect(body.IntervalIndex).to.be.a("number");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  The tap when a behavior happens. Optional "timestamp" for taps recorded earlier (for example offline). Send it a few times.

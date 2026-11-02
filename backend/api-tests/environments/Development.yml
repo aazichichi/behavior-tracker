@@ -1,0 +1,8 @@
+name: Development
+variables:
+  - name: baseURL
+    value: http://localhost:5000
+  - name: login
+    value: jrivera
+  - name: password
+    value: Password123!

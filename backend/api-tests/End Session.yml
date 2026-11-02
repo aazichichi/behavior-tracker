@@ -1,0 +1,39 @@
+info:
+  name: End Session
+  type: http
+  seq: 15
+
+http:
+  method: PATCH
+  url: "{{baseURL}}/api/sessions/{{sessionId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "status": "ended",
+        "notes": "Fewer outbursts after the break card reminder"
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 200 with an ended session", function () {
+          expect(res.getStatus()).to.equal(200);
+          expect(body.Status).to.equal("ended");
+          expect(body.EndTime).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Ends the session now. No more events can be added after this.

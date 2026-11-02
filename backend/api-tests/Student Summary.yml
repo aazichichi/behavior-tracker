@@ -1,0 +1,31 @@
+info:
+  name: Student Summary
+  type: http
+  seq: 17
+
+http:
+  method: GET
+  url: "{{baseURL}}/api/students/{{studentId}}/summary"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 200 with per-session data", function () {
+          expect(res.getStatus()).to.equal(200);
+          expect(body.sessions.length).to.be.at.least(1);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Progress across sessions: counts and rate per hour for each behavior. Optional ?from=2026-10-01&to=2026-10-31.

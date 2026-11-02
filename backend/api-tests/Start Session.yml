@@ -1,0 +1,44 @@
+info:
+  name: Start Session
+  type: http
+  seq: 13
+
+http:
+  method: POST
+  url: "{{baseURL}}/api/students/{{studentId}}/sessions"
+  body:
+    type: json
+    data: |-
+      {
+        "intervalSeconds": 120,
+        "notes": "Morning reading block"
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          bru.setVar("sessionId", res.getBody()._id);
+        }
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 201 with an active session", function () {
+          expect(res.getStatus()).to.equal(201);
+          expect(body.Status).to.equal("active");
+          expect(body.EndTime).to.equal(null);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Starts an observation session now. Only one active session per student (409 otherwise).

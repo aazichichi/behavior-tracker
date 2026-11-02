@@ -1,0 +1,31 @@
+info:
+  name: Who Am I
+  type: http
+  seq: 7
+
+http:
+  method: GET
+  url: "{{baseURL}}/api/auth/me"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 200 with the logged-in user", function () {
+          expect(res.getStatus()).to.equal(200);
+          expect(body._id).to.equal(bru.getVar("userId"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Returns the user the saved token belongs to. Run Login first.

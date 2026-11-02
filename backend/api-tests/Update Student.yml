@@ -1,0 +1,38 @@
+info:
+  name: Update Student
+  type: http
+  seq: 10
+
+http:
+  method: PATCH
+  url: "{{baseURL}}/api/students/{{studentId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "gradeLevel": "3",
+        "notes": "Moved up a grade"
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 200 with the change", function () {
+          expect(res.getStatus()).to.equal(200);
+          expect(body.GradeLevel).to.equal("3");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Send only the fields you want to change: firstName, lastName, gradeLevel, notes.

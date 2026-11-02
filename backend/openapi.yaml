@@ -1,0 +1,1355 @@
+openapi: 3.0.3
+info:
+  title: Behavior Tracker API
+  version: 2.0.0
+  description: |
+    REST API for the ABA Behavior Tracker, a MERN web and mobile app for
+    tracking student behavioral data. All requests and responses are JSON.
+
+    **Naming:** request bodies use camelCase (`firstName`); responses use the
+    database's PascalCase field names (`FirstName`).
+
+    **Logging in:** run **POST /auth/login** (the demo login is pre-filled),
+    copy the `token` from the response, click **Authorize**, and paste it in.
+    Every route except Health, login, register and the email flows needs it.
+    You only ever see and change your own students and their data.
+servers:
+  - url: https://mernbehaviortracker.xyz:5000/api
+    description: Team droplet
+  - url: http://localhost:5000/api
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Health
+  - name: Auth
+    description: Login, email verification, password reset
+  - name: Users
+    description: Register and manage your own account
+  - name: Students
+    description: The students on your caseload
+  - name: Behaviors
+    description: Behaviors tracked for each student, each with a one-letter code
+  - name: Sessions
+    description: Timed observation sessions, split into intervals
+  - name: Events
+    description: Each time a behavior happens during a session
+
+paths:
+  /ping:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: ping
+      security: []
+      responses:
+        '200':
+          description: The API is running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Hello World
+
+  # ---------------------------------------------------------------- Auth
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in
+      description: |
+        Looks up the user by `Login` and checks the password against the stored
+        bcrypt hash. Returns a JWT for the protected routes.
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              demo:
+                summary: Seeded demo teacher
+                value:
+                  login: jrivera
+                  password: Password123!
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Wrong login or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Invalid login or password
+        '403':
+          description: Email not verified (only when REQUIRE_EMAIL_VERIFICATION=true)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Who is logged in
+      description: Returns the user the token belongs to, so the apps can restore a saved login.
+      operationId: me
+      responses:
+        '200':
+          description: The logged-in user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/verify-email:
+    post:
+      tags: [Auth]
+      summary: Verify an email address
+      description: The web app's /verify-email page sends the token from the emailed link.
+      operationId: verifyEmail
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+        '400':
+          description: Invalid or already-used token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags: [Auth]
+      summary: Verify an email address (link form)
+      description: Used when the emailed link points straight at the API (APP_URL not set).
+      operationId: verifyEmailLink
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+        '400':
+          description: Invalid or already-used token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/resend-verification:
+    post:
+      tags: [Auth]
+      summary: Send a new verification email
+      description: Always replies 200 so it can't be used to find out who has an account.
+      operationId: resendVerification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Email a password-reset link
+      description: |
+        Emails a link to `APP_URL/reset-password?token=...`, valid for 1 hour.
+        Always replies 200 so it can't be used to find out who has an account.
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+            example:
+              email: jordan.rivera@example.com
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Set a new password with a reset token
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+        '400':
+          description: Missing fields, short password, or an invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ---------------------------------------------------------------- Users
+  /users:
+    post:
+      tags: [Users]
+      summary: Register a new user
+      description: |
+        Creates a teacher or parent account with `IsVerified: false` and emails a
+        verification link. Checks the login and email aren't taken and hashes the
+        password with bcrypt.
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              teacher:
+                summary: New teacher
+                value:
+                  firstName: Test
+                  lastName: Teacher
+                  email: test.teacher@example.com
+                  login: testteacher
+                  password: Passw0rd!
+                  role: teacher
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: User registered successfully
+                  - $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Login or email already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: A user with that login already exists
+
+  /users/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/userId'
+    get:
+      tags: [Users]
+      summary: Get my account
+      operationId: getUser
+      responses:
+        '200':
+          description: The user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Users]
+      summary: Update my account
+      description: |
+        Change name or email, or change the password by sending both
+        `currentPassword` and `newPassword`. A new email must be verified again.
+      operationId: updateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                currentPassword:
+                  type: string
+                  format: password
+                newPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        '200':
+          description: The updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Missing token, or currentPassword is wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ---------------------------------------------------------------- Students
+  /students:
+    get:
+      tags: [Students]
+      summary: List my students
+      operationId: listStudents
+      parameters:
+        - name: search
+          in: query
+          description: Matches first or last name, ignoring case
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Students sorted by last name, then first name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Students]
+      summary: Add a student
+      operationId: createStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentInput'
+            example:
+              firstName: Ava
+              lastName: Brooks
+              gradeLevel: '2'
+              notes: Prefers visual schedules
+      responses:
+        '201':
+          description: Student created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /students/{studentId}:
+    parameters:
+      - $ref: '#/components/parameters/studentId'
+    get:
+      tags: [Students]
+      summary: Get a student
+      operationId: getStudent
+      responses:
+        '200':
+          description: The student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Students]
+      summary: Update a student
+      description: Send only the fields to change.
+      operationId: updateStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentInput'
+            example:
+              gradeLevel: '3'
+      responses:
+        '200':
+          description: The updated student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Students]
+      summary: Delete a student and all of their data
+      description: Also deletes the student's behaviors, sessions and events.
+      operationId: deleteStudent
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Student deleted
+                  deleted:
+                    type: object
+                    properties:
+                      behaviors:
+                        type: integer
+                      sessions:
+                        type: integer
+                      events:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /students/{studentId}/summary:
+    parameters:
+      - $ref: '#/components/parameters/studentId'
+    get:
+      tags: [Students]
+      summary: Progress across sessions
+      description: For graphing trends. Per session, the count and rate per hour of each behavior.
+      operationId: getStudentSummary
+      parameters:
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+      responses:
+        '200':
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Summary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------- Behaviors
+  /students/{studentId}/behaviors:
+    parameters:
+      - $ref: '#/components/parameters/studentId'
+    get:
+      tags: [Behaviors]
+      summary: List a student's behaviors
+      operationId: listBehaviors
+      parameters:
+        - name: includeArchived
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Behaviors sorted by code
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Behavior'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Behaviors]
+      summary: Add a behavior to track
+      operationId: createBehavior
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BehaviorInput'
+            example:
+              name: Vocal outburst
+              code: V
+              description: Yelling above conversational volume
+              color: '#F3A712'
+      responses:
+        '201':
+          description: Behavior created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Behavior'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: That code is already used by another active behavior for this student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /behaviors/{behaviorId}:
+    parameters:
+      - $ref: '#/components/parameters/behaviorId'
+    get:
+      tags: [Behaviors]
+      summary: Get a behavior
+      operationId: getBehavior
+      responses:
+        '200':
+          description: The behavior
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Behavior'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Behaviors]
+      summary: Update or archive a behavior
+      operationId: updateBehavior
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/BehaviorInput'
+                - type: object
+                  properties:
+                    isArchived:
+                      type: boolean
+      responses:
+        '200':
+          description: The updated behavior
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Behavior'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: That code is already used by another active behavior for this student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags: [Behaviors]
+      summary: Delete a behavior
+      description: A behavior with recorded events is archived instead, so past charts keep it.
+      operationId: deleteBehavior
+      responses:
+        '200':
+          description: Deleted (`archived` false) or archived (`archived` true)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  archived:
+                    type: boolean
+                  behavior:
+                    $ref: '#/components/schemas/Behavior'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------- Sessions
+  /students/{studentId}/sessions:
+    parameters:
+      - $ref: '#/components/parameters/studentId'
+    get:
+      tags: [Sessions]
+      summary: List a student's sessions
+      operationId: listSessions
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, ended]
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        '200':
+          description: Sessions, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Sessions]
+      summary: Start a session now
+      operationId: startSession
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                intervalSeconds:
+                  type: integer
+                  minimum: 10
+                  maximum: 3600
+                  default: 120
+                notes:
+                  type: string
+            example:
+              intervalSeconds: 120
+              notes: Morning reading block
+      responses:
+        '201':
+          description: Session started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The student already has an active session
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      activeSessionId:
+                        type: string
+
+  /sessions/{sessionId}:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    get:
+      tags: [Sessions]
+      summary: Get a session with its events
+      operationId: getSession
+      responses:
+        '200':
+          description: The session, plus its events oldest first
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Session'
+                  - type: object
+                    properties:
+                      events:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BehaviorEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Sessions]
+      summary: End a session or edit its notes
+      operationId: updateSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ended]
+                  description: Ends the session now
+                notes:
+                  type: string
+            example:
+              status: ended
+              notes: Fewer outbursts after the break card reminder
+      responses:
+        '200':
+          description: The updated session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Sessions]
+      summary: Delete a session and its events
+      operationId: deleteSession
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  deletedEvents:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /sessions/{sessionId}/chart:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    get:
+      tags: [Sessions]
+      summary: Interval chart for a session
+      description: Which behavior codes happened in each interval, plus a total per behavior.
+      operationId: getSessionChart
+      responses:
+        '200':
+          description: Chart data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chart'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------- Events
+  /sessions/{sessionId}/events:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    get:
+      tags: [Events]
+      summary: List a session's events
+      operationId: listEvents
+      responses:
+        '200':
+          description: Events, oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BehaviorEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Events]
+      summary: Record that a behavior happened
+      description: |
+        The tap. `timestamp` defaults to now; send it for taps recorded earlier
+        (for example offline). The API works out `IntervalIndex`.
+      operationId: createEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [behaviorId]
+              properties:
+                behaviorId:
+                  type: string
+                  example: 6ad220480003000000000002
+                timestamp:
+                  oneOf:
+                    - type: string
+                      format: date-time
+                    - type: integer
+                      description: Milliseconds since 1970 (Date.now())
+      responses:
+        '201':
+          description: Event recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BehaviorEvent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Session not found, or the behavior isn't one of this student's
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: The session has ended, or the behavior is archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /events/{eventId}:
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+    get:
+      tags: [Events]
+      summary: Get an event
+      operationId: getEvent
+      responses:
+        '200':
+          description: The event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BehaviorEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Events]
+      summary: Delete an event (undo a tap)
+      operationId: deleteEvent
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    userId:
+      name: userId
+      in: path
+      required: true
+      description: Your user `_id` (from the login response)
+      schema:
+        $ref: '#/components/schemas/ObjectId'
+    studentId:
+      name: studentId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ObjectId'
+    behaviorId:
+      name: behaviorId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ObjectId'
+    sessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ObjectId'
+    from:
+      name: from
+      in: query
+      description: Only sessions that started on or after this date
+      schema:
+        type: string
+        format: date
+        example: '2026-10-01'
+    to:
+      name: to
+      in: query
+      description: Only sessions that started on or before this date
+      schema:
+        type: string
+        format: date
+        example: '2026-10-31'
+
+  responses:
+    Message:
+      description: Done
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    BadRequest:
+      description: Missing or invalid fields
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing, invalid, or expired token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Authentication required
+    Forbidden:
+      description: Not your account
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not found, or it belongs to someone else
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    ObjectId:
+      type: string
+      pattern: '^[0-9a-fA-F]{24}$'
+      example: 6ad21fd00002000000000001
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [login, password]
+      properties:
+        login:
+          type: string
+          example: jrivera
+        password:
+          type: string
+          format: password
+          example: Password123!
+
+    EmailRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+
+    RegisterRequest:
+      type: object
+      required: [firstName, lastName, email, login, password]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        login:
+          type: string
+        password:
+          type: string
+          format: password
+          minLength: 8
+        role:
+          type: string
+          enum: [teacher, parent]
+          default: teacher
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: 'JWT to send as `Authorization: Bearer <token>`'
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        FirstName:
+          type: string
+          example: Jordan
+        LastName:
+          type: string
+          example: Rivera
+        Email:
+          type: string
+          example: jordan.rivera@example.com
+        Login:
+          type: string
+          example: jrivera
+        Role:
+          type: string
+          enum: [teacher, parent]
+        IsVerified:
+          type: boolean
+        DateCreated:
+          type: string
+          format: date-time
+        DateUpdated:
+          type: string
+          format: date-time
+
+    StudentInput:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        gradeLevel:
+          type: string
+          description: K, 1, 2, ...
+        notes:
+          type: string
+
+    Student:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        UserId:
+          $ref: '#/components/schemas/ObjectId'
+        FirstName:
+          type: string
+          example: Mia
+        LastName:
+          type: string
+          example: Thompson
+        GradeLevel:
+          type: string
+          example: '2'
+        Notes:
+          type: string
+        DateCreated:
+          type: string
+          format: date-time
+        DateUpdated:
+          type: string
+          format: date-time
+
+    BehaviorInput:
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+          pattern: '^[A-Za-z]$'
+          description: One letter, stored uppercase
+        description:
+          type: string
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          default: '#3B82F6'
+
+    Behavior:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        StudentId:
+          $ref: '#/components/schemas/ObjectId'
+        UserId:
+          $ref: '#/components/schemas/ObjectId'
+        Name:
+          type: string
+          example: Vocal outburst
+        Code:
+          type: string
+          example: V
+        Description:
+          type: string
+        Color:
+          type: string
+          example: '#F3A712'
+        IsArchived:
+          type: boolean
+        DateCreated:
+          type: string
+          format: date-time
+        DateUpdated:
+          type: string
+          format: date-time
+
+    Session:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        UserId:
+          $ref: '#/components/schemas/ObjectId'
+        StudentId:
+          $ref: '#/components/schemas/ObjectId'
+        StartTime:
+          type: string
+          format: date-time
+        EndTime:
+          type: string
+          format: date-time
+          nullable: true
+          description: null while the session is active
+        IntervalSeconds:
+          type: integer
+          example: 120
+        Status:
+          type: string
+          enum: [active, ended]
+        Notes:
+          type: string
+        DateCreated:
+          type: string
+          format: date-time
+        DateUpdated:
+          type: string
+          format: date-time
+
+    BehaviorEvent:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        SessionId:
+          $ref: '#/components/schemas/ObjectId'
+        StudentId:
+          $ref: '#/components/schemas/ObjectId'
+        BehaviorId:
+          $ref: '#/components/schemas/ObjectId'
+        UserId:
+          $ref: '#/components/schemas/ObjectId'
+        Timestamp:
+          type: string
+          format: date-time
+        IntervalIndex:
+          type: integer
+          description: floor((Timestamp - StartTime) / IntervalSeconds)
+
+    BehaviorTotal:
+      type: object
+      properties:
+        behaviorId:
+          type: string
+        Name:
+          type: string
+        Code:
+          type: string
+        Color:
+          type: string
+        count:
+          type: integer
+
+    Chart:
+      type: object
+      properties:
+        session:
+          $ref: '#/components/schemas/Session'
+        intervalSeconds:
+          type: integer
+        totalIntervals:
+          type: integer
+        intervals:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+              startSeconds:
+                type: integer
+              endSeconds:
+                type: integer
+              counts:
+                type: object
+                additionalProperties:
+                  type: integer
+                example:
+                  V: 2
+                  H: 1
+              codes:
+                type: array
+                items:
+                  type: string
+                example: [H, V]
+        totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/BehaviorTotal'
+
+    Summary:
+      type: object
+      properties:
+        student:
+          $ref: '#/components/schemas/Student'
+        sessions:
+          type: array
+          items:
+            type: object
+            properties:
+              sessionId:
+                type: string
+              StartTime:
+                type: string
+                format: date-time
+              EndTime:
+                type: string
+                format: date-time
+                nullable: true
+              Status:
+                type: string
+              minutes:
+                type: number
+              counts:
+                type: object
+                description: behaviorId -> count
+                additionalProperties:
+                  type: integer
+              ratePerHour:
+                type: object
+                description: behaviorId -> times per hour
+                additionalProperties:
+                  type: number
+        behaviors:
+          type: array
+          items:
+            type: object
+            properties:
+              behaviorId:
+                type: string
+              Name:
+                type: string
+              Code:
+                type: string
+              Color:
+                type: string
+              IsArchived:
+                type: boolean
+              total:
+                type: integer

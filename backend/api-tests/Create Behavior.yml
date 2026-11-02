@@ -1,0 +1,48 @@
+info:
+  name: Create Behavior
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseURL}}/api/students/{{studentId}}/behaviors"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Vocal outburst",
+        "code": "V",
+        "description": "Yelling above conversational volume",
+        "color": "#F3A712"
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          bru.setVar("behaviorId", res.getBody()._id);
+        }
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 201 Created", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("code is one capital letter", function () {
+          expect(body.Code).to.equal("V");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Defines a behavior to track for the student. Each active behavior needs its own letter (409 if it's taken).
