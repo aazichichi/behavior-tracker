@@ -10,7 +10,7 @@ const ROLES = ['teacher', 'parent'];
 //   takes:   { firstName, lastName, email, login, password, role }
 //            role is "teacher" or "parent" (defaults to teacher)
 //   returns: 201 { message, token, user }  |  409 { error } taken  |  400 { error } bad input
-//   db:      Users.exists({ Login }), Users.exists({ Email }), then insert with User.create
+//   db:      User.exists({ login }), User.exists({ email }), then insert with User.create
 exports.createUser = async (req, res, next) => {
   try {
     const { firstName, lastName, email, login, password, role = 'teacher' } = req.body || {};
@@ -34,10 +34,10 @@ exports.createUser = async (req, res, next) => {
     const cleanLogin = String(login).trim().toLowerCase();
     const cleanEmail = String(email).trim().toLowerCase();
 
-    if (await User.exists({ Login: cleanLogin })) {
+    if (await User.exists({ login: cleanLogin })) {
       return res.status(409).json({ error: 'A user with that login already exists' });
     }
-    if (await User.exists({ Email: cleanEmail })) {
+    if (await User.exists({ email: cleanEmail })) {
       return res.status(409).json({ error: 'A user with that email already exists' });
     }
 
@@ -45,14 +45,14 @@ exports.createUser = async (req, res, next) => {
     // new accounts start unverified, with a token for the verify-email link
     const verificationToken = crypto.randomBytes(16).toString('hex');
     const user = await User.create({
-      FirstName: String(firstName),
-      LastName: String(lastName),
-      Email: cleanEmail,
-      Login: cleanLogin,
-      Password: String(password),
-      Role: role,
-      IsVerified: false,
-      VerificationToken: verificationToken
+      firstName: String(firstName),
+      lastName: String(lastName),
+      email: cleanEmail,
+      login: cleanLogin,
+      password: String(password),
+      role: role,
+      isVerified: false,
+      verificationToken: verificationToken
     });
 
     // if the email fails to send we still keep the account, they can just
@@ -73,7 +73,7 @@ exports.createUser = async (req, res, next) => {
 
 // GET /api/users/:userId  (needs "Authorization: Bearer <token>")
 //   returns: 200 user  |  401/403 { error }  |  404 { error }
-//   db:      Users.findById(userId)
+//   db:      User.findById(userId)
 exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userId);
@@ -92,18 +92,19 @@ exports.getUser = async (req, res, next) => {
 //   takes:   any of { firstName, lastName, email }
 //            to change the password send { currentPassword, newPassword }
 //   returns: 200 user  |  400 { error }  |  401 wrong currentPassword  |  409 email taken
-//   db:      Users.findById, Users.exists({ Email }), then save
+//   db:      User.findById, User.exists({ email }), then save
 //   note: changing your email makes the account unverified again and sends a new link
 exports.updateUser = async (req, res, next) => {
   try {
-    const updates = pick(req.body, { firstName: 'FirstName', lastName: 'LastName', email: 'Email' });
+    // Updated pick keys to map directly from camelCase request body to camelCase database fields
+    const updates = pick(req.body, { firstName: 'firstName', lastName: 'lastName', email: 'email' });
     const { currentPassword, newPassword } = req.body || {};
 
     if (Object.keys(updates).length === 0 && newPassword === undefined) {
       return res.status(400).json({ error: 'Send firstName, lastName, email, or currentPassword + newPassword' });
     }
 
-    const user = await User.findById(req.params.userId).select('+Password');
+    const user = await User.findById(req.params.userId).select('+password'); // Adjusted if schema option changed, otherwise matches field
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     if (newPassword !== undefined) {
@@ -113,14 +114,14 @@ exports.updateUser = async (req, res, next) => {
       if (String(newPassword).length < 8) {
         return res.status(400).json({ error: 'newPassword must be at least 8 characters' });
       }
-      user.Password = String(newPassword); // gets hashed on save
+      user.password = String(newPassword); // gets hashed on save
     }
 
     let emailChanged = false;
-    if (updates.Email !== undefined) {
-      updates.Email = String(updates.Email).trim().toLowerCase();
-      if (updates.Email !== user.Email) {
-        if (await User.exists({ Email: updates.Email, _id: { $ne: user._id } })) {
+    if (updates.email !== undefined) {
+      updates.email = String(updates.email).trim().toLowerCase();
+      if (updates.email !== user.email) {
+        if (await User.exists({ email: updates.email, _id: { $ne: user._id } })) {
           return res.status(409).json({ error: 'A user with that email already exists' });
         }
         emailChanged = true;
@@ -131,8 +132,8 @@ exports.updateUser = async (req, res, next) => {
     let verificationToken;
     if (emailChanged) {
       verificationToken = crypto.randomBytes(16).toString('hex');
-      user.IsVerified = false;
-      user.VerificationToken = verificationToken;
+      user.isVerified = false;
+      user.verificationToken = verificationToken;
     }
     await user.save();
 

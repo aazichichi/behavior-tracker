@@ -3,20 +3,20 @@
     "_id": {
       "$oid": "6ad0dc600001000000000001"
     },
-    "FirstName": "Jordan",
-    "LastName": "Rivera",
-    "Email": "jordan.rivera@example.com",
-    "Login": "jrivera",
-    "Password": "$2b$10$mNXdaPZ4aThtSB8MhwQGAe8DvwwRe5MySFDsf77WVCu2oZn7pMBfW",
-    "Role": "teacher",
-    "IsVerified": true,
-    "VerificationToken": null,
-    "ResetPasswordToken": null,
-    "ResetPasswordExpires": null,
-    "DateCreated": {
+    "firstName": "Jordan",
+    "lastName": "Rivera",
+    "email": "jordan.rivera@example.com",
+    "login": "jrivera",
+    "password": "$2b$10$mNXdaPZ4aThtSB8MhwQGAe8DvwwRe5MySFDsf77WVCu2oZn7pMBfW",
+    "role": "teacher",
+    "isVerified": true,
+    "verificationToken": null,
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "dateCreated": {
       "$date": "2026-10-15T14:00:00.000Z"
     },
-    "DateUpdated": {
+    "dateUpdated": {
       "$date": "2026-10-15T14:00:00.000Z"
     }
   },
@@ -24,20 +24,20 @@
     "_id": {
       "$oid": "6ad0ea700001000000000002"
     },
-    "FirstName": "Avery",
-    "LastName": "Chen",
-    "Email": "avery.chen@example.com",
-    "Login": "achen",
-    "Password": "$2b$10$wyeiV44OTUtIND897EHmAOwF35gjDO5wFNJe0IFz7oicheT.Mse96",
-    "Role": "teacher",
-    "IsVerified": true,
-    "VerificationToken": null,
-    "ResetPasswordToken": null,
-    "ResetPasswordExpires": null,
-    "DateCreated": {
+    "firstName": "Avery",
+    "lastName": "Chen",
+    "email": "avery.chen@example.com",
+    "login": "achen",
+    "password": "$2b$10$wyeiV44OTUtIND897EHmAOwF35gjDO5wFNJe0IFz7oicheT.Mse96",
+    "role": "teacher",
+    "isVerified": true,
+    "verificationToken": null,
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "dateCreated": {
       "$date": "2026-10-15T15:00:00.000Z"
     },
-    "DateUpdated": {
+    "dateUpdated": {
       "$date": "2026-10-15T15:00:00.000Z"
     }
   },
@@ -45,20 +45,20 @@
     "_id": {
       "$oid": "6ad0f8800001000000000003"
     },
-    "FirstName": "Sam",
-    "LastName": "Patel",
-    "Email": "sam.patel@example.com",
-    "Login": "spatel",
-    "Password": "$2b$10$cwA5lYdBl4UCEZUxUb5MROPU39ZrY813TNujiKzsHMjiVF7taweja",
-    "Role": "parent",
-    "IsVerified": false,
-    "VerificationToken": "a3f9c2e1b7d84f60a1c5e9b2d7f3a8c4",
-    "ResetPasswordToken": null,
-    "ResetPasswordExpires": null,
-    "DateCreated": {
+    "firstName": "Sam",
+    "lastName": "Patel",
+    "email": "sam.patel@example.com",
+    "login": "spatel",
+    "password": "$2b$10$cwA5lYdBl4UCEZUxUb5MROPU39ZrY813TNujiKzsHMjiVF7taweja",
+    "role": "parent",
+    "isVerified": false,
+    "verificationToken": "a3f9c2e1b7d84f60a1c5e9b2d7f3a8c4",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "dateCreated": {
       "$date": "2026-10-15T16:00:00.000Z"
     },
-    "DateUpdated": {
+    "dateUpdated": {
       "$date": "2026-10-15T16:00:00.000Z"
     }
   }

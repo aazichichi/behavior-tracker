@@ -2,17 +2,17 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { pick, isTrue, parseDate, escapeRegex } = require('../utils/body');
 
-test('pick renames allowed fields and drops everything else', () => {
-  const body = { firstName: 'Mia', lastName: 'T', UserId: 'attacker', _id: 'x' };
-  assert.deepEqual(pick(body, { firstName: 'FirstName', lastName: 'LastName' }), {
-    FirstName: 'Mia',
-    LastName: 'T'
+test('pick copies allowed fields and drops everything else', () => {
+  const body = { firstName: 'Mia', lastName: 'T', userId: 'attacker', _id: 'x' };
+  assert.deepEqual(pick(body, { firstName: 'firstName', lastName: 'lastName' }), {
+    firstName: 'Mia',
+    lastName: 'T'
   });
 });
 
 test('pick skips fields that were not sent, but keeps empty strings', () => {
-  assert.deepEqual(pick({ notes: '' }, { notes: 'Notes', gradeLevel: 'GradeLevel' }), { Notes: '' });
-  assert.deepEqual(pick(undefined, { notes: 'Notes' }), {});
+  assert.deepEqual(pick({ notes: '' }, { notes: 'notes', gradeLevel: 'gradeLevel' }), { notes: '' });
+  assert.deepEqual(pick(undefined, { notes: 'notes' }), {});
 });
 
 test('isTrue understands query-string booleans', () => {

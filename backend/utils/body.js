@@ -1,15 +1,17 @@
-// request bodies come in camelCase (firstName) but the db uses PascalCase (FirstName).
-// pick() copies over only the fields we allow AND that were actually sent, renaming
-// them as it goes. this also means a client can't sneak in fields like UserId.
+// Request bodies and the database schema now both use camelCase.
+// pick() copies over only the fields we allow AND that were actually sent.
+// This ensures clients cannot sneak in protected fields like userId.
 //
-//   pick({ firstName: 'Mia', UserId: 'x' }, { firstName: 'FirstName' })
-//   -> { FirstName: 'Mia' }
+//   pick({ firstName: 'Mia', userId: 'x' }, { firstName: 'firstName' })
+//   -> { firstName: 'Mia' }
 exports.pick = (body, fieldMap) => {
   const out = {};
   if (!body || typeof body !== 'object') return out;
 
   for (const [from, to] of Object.entries(fieldMap)) {
-    if (body[from] !== undefined) out[to] = body[from];
+    if (body[from] !== undefined) {
+      out[to] = body[from];
+    }
   }
   return out;
 };
