@@ -10,6 +10,9 @@ const router = express.Router();
 // POST /api/auth/login - check username + password, get a token back
 router.post('/login', auth.login);
 
+// ADD THIS ROUTE: POST /api/auth/register - sign up a new teacher with student + behaviors
+router.post('/register', auth.register);
+
 // GET /api/auth/me - who's logged in right now (needs the token)
 router.get('/me', requireAuth, auth.me);
 

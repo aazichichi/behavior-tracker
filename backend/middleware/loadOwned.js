@@ -13,7 +13,7 @@ module.exports = (Model, reqKey) => async (req, res, next, id, name) => {
       return res.status(400).json({ error: `Invalid ${name}: ${id}` });
     }
 
-    const doc = await Model.findOne({ _id: id, UserId: req.userId });
+    const doc = await Model.findOne({ _id: id, userId: req.userId });
     if (!doc) {
       return res.status(404).json({ error: `${Model.modelName} not found` });
     }

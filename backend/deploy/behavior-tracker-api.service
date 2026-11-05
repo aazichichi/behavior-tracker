@@ -1,0 +1,10 @@
+[Service]
+WorkingDirectory=/opt/behavior-tracker-api
+Environment=NODE_VERSION=26
+Environment=NODE_ENV=production
+ExecStart=%h/.nvm/nvm-exec node server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

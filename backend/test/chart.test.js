@@ -26,29 +26,29 @@ test('intervalIndexFor never goes below 0', () => {
 });
 
 test('totalIntervalsFor: a 30-minute ended session has 15 two-minute intervals', () => {
-  const session = { StartTime: start, EndTime: at(1800), IntervalSeconds: 120 };
+  const session = { startTime: start, endTime: at(1800), intervalSeconds: 120 };
   assert.equal(totalIntervalsFor(session), 15);
 });
 
 test('totalIntervalsFor: an active session counts up to now, at least 1', () => {
-  const session = { StartTime: start, EndTime: null, IntervalSeconds: 120 };
+  const session = { startTime: start, endTime: null, intervalSeconds: 120 };
   assert.equal(totalIntervalsFor(session, at(250)), 3);
   assert.equal(totalIntervalsFor(session, at(0)), 1);
 });
 
 const behaviors = [
-  { _id: 'b1', Name: 'Vocal outburst', Code: 'V', Color: '#F3A712', IsArchived: false },
-  { _id: 'b2', Name: 'Hand raise', Code: 'H', Color: '#2E9E5B', IsArchived: false }
+  { _id: 'b1', name: 'Vocal outburst', code: 'V', color: '#F3A712', isArchived: false },
+  { _id: 'b2', name: 'Hand raise', code: 'H', color: '#2E9E5B', isArchived: false }
 ];
 
 test('buildChart groups events into intervals and totals', () => {
-  const session = { _id: 's1', StartTime: start, EndTime: at(600), IntervalSeconds: 120 };
+  const session = { _id: 's1', startTime: start, endTime: at(600), intervalSeconds: 120 };
   const events = [
-    { SessionId: 's1', BehaviorId: 'b1', IntervalIndex: 0 },
-    { SessionId: 's1', BehaviorId: 'b1', IntervalIndex: 0 },
-    { SessionId: 's1', BehaviorId: 'b2', IntervalIndex: 0 },
-    { SessionId: 's1', BehaviorId: 'b2', IntervalIndex: 4 },
-    { SessionId: 's1', BehaviorId: 'gone', IntervalIndex: 2 } // behavior that got deleted, should be skipped
+    { sessionId: 's1', behaviorId: 'b1', intervalIndex: 0 },
+    { sessionId: 's1', behaviorId: 'b1', intervalIndex: 0 },
+    { sessionId: 's1', behaviorId: 'b2', intervalIndex: 0 },
+    { sessionId: 's1', behaviorId: 'b2', intervalIndex: 4 },
+    { sessionId: 's1', behaviorId: 'gone', intervalIndex: 2 } // behavior that got deleted, should be skipped
   ];
 
   const chart = buildChart(session, events, behaviors);
@@ -62,30 +62,30 @@ test('buildChart groups events into intervals and totals', () => {
   assert.deepEqual(chart.intervals[2].codes, []);
   assert.deepEqual(chart.intervals[4].codes, ['H']);
   assert.deepEqual(
-    chart.totals.map((t) => [t.Code, t.count]),
+    chart.totals.map((t) => [t.code, t.count]),
     [['V', 2], ['H', 2]]
   );
 });
 
 test('buildChart grows to fit an event past the end time', () => {
-  const session = { StartTime: start, EndTime: at(120), IntervalSeconds: 120 };
-  const chart = buildChart(session, [{ BehaviorId: 'b1', IntervalIndex: 3 }], behaviors);
+  const session = { startTime: start, endTime: at(120), intervalSeconds: 120 };
+  const chart = buildChart(session, [{ behaviorId: 'b1', intervalIndex: 3 }], behaviors);
   assert.equal(chart.totalIntervals, 4);
   assert.deepEqual(chart.intervals[3].codes, ['V']);
 });
 
 test('buildSummary counts per session and works out the rate per hour', () => {
   const sessions = [
-    { _id: 's1', StartTime: start, EndTime: at(1800), Status: 'ended' }, // 30 min
-    { _id: 's2', StartTime: at(86400), EndTime: at(86400 + 1200), Status: 'ended' } // 20 min
+    { _id: 's1', startTime: start, endTime: at(1800), status: 'ended' }, // 30 min
+    { _id: 's2', startTime: at(86400), endTime: at(86400 + 1200), status: 'ended' } // 20 min
   ];
   const events = [
-    { SessionId: 's1', BehaviorId: 'b1' },
-    { SessionId: 's1', BehaviorId: 'b1' },
-    { SessionId: 's1', BehaviorId: 'b1' },
-    { SessionId: 's2', BehaviorId: 'b1' },
-    { SessionId: 's2', BehaviorId: 'b2' },
-    { SessionId: 'other', BehaviorId: 'b1' } // session not in the list, should be skipped
+    { sessionId: 's1', behaviorId: 'b1' },
+    { sessionId: 's1', behaviorId: 'b1' },
+    { sessionId: 's1', behaviorId: 'b1' },
+    { sessionId: 's2', behaviorId: 'b1' },
+    { sessionId: 's2', behaviorId: 'b2' },
+    { sessionId: 'other', behaviorId: 'b1' } // session not in the list, should be skipped
   ];
 
   const summary = buildSummary(sessions, events, behaviors);
@@ -96,7 +96,7 @@ test('buildSummary counts per session and works out the rate per hour', () => {
   assert.equal(summary.sessions[0].ratePerHour.b1, 6); // 3 in 30 min = 6/hour
   assert.equal(summary.sessions[1].ratePerHour.b2, 3); // 1 in 20 min = 3/hour
   assert.deepEqual(
-    summary.behaviors.map((b) => [b.Code, b.total]),
+    summary.behaviors.map((b) => [b.code, b.total]),
     [['V', 4], ['H', 1]]
   );
 });

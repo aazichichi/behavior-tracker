@@ -2,27 +2,27 @@ const { Student, Behavior, Session, BehaviorEvent } = require('../models');
 const { pick, escapeRegex, parseDate } = require('../utils/body');
 const { buildSummary } = require('../utils/chart');
 
-// request body field name -> db field name. anything else in the body gets ignored
+// request body field name -> db field name. Map directly to camelCase.
 const FIELDS = {
-  firstName: 'FirstName',
-  lastName: 'LastName',
-  gradeLevel: 'GradeLevel',
-  notes: 'Notes'
+  firstName: 'firstName',
+  lastName: 'lastName',
+  gradeLevel: 'gradeLevel',
+  notes: 'notes'
 };
 
 // GET /api/students?search=mia
 //   returns: 200 [student, ...] sorted by last name then first name
-//   db:      Students.find({ UserId, [FirstName or LastName matches search] })
+//   db:      Student.find({ userId, [firstName or lastName matches search] })
 exports.listStudents = async (req, res, next) => {
   try {
-    const filter = { UserId: req.userId };
+    const filter = { userId: req.userId };
 
     if (req.query.search) {
       const pattern = new RegExp(escapeRegex(req.query.search), 'i');
-      filter.$or = [{ FirstName: pattern }, { LastName: pattern }];
+      filter.$or = [{ firstName: pattern }, { lastName: pattern }];
     }
 
-    const students = await Student.find(filter).sort({ LastName: 1, FirstName: 1 });
+    const students = await Student.find(filter).sort({ lastName: 1, firstName: 1 });
     res.status(200).json(students);
   } catch (err) {
     next(err);
@@ -32,16 +32,16 @@ exports.listStudents = async (req, res, next) => {
 // POST /api/students
 //   takes:   { firstName, lastName, gradeLevel?, notes? }
 //   returns: 201 student  |  400 { error }
-//   db:      Students.insertOne
+//   db:      Student.create
 exports.createStudent = async (req, res, next) => {
   try {
     const fields = pick(req.body, FIELDS);
 
-    if (!fields.FirstName || !fields.LastName) {
+    if (!fields.firstName || !fields.lastName) {
       return res.status(400).json({ error: 'firstName and lastName are required' });
     }
 
-    const student = await Student.create({ ...fields, UserId: req.userId });
+    const student = await Student.create({ ...fields, userId: req.userId });
     res.status(201).location(`/api/students/${student._id}`).json(student);
   } catch (err) {
     next(err);
@@ -50,7 +50,7 @@ exports.createStudent = async (req, res, next) => {
 
 // GET /api/students/:studentId
 //   returns: 200 student  |  404 { error }
-//   db:      Students.findOne({ _id, UserId })  (loadOwned already did this for us)
+//   db:      Student.findOne({ _id, userId })  (loadOwned already did this for us)
 exports.getStudent = (req, res) => {
   res.status(200).json(req.student);
 };
@@ -58,7 +58,7 @@ exports.getStudent = (req, res) => {
 // PATCH /api/students/:studentId
 //   takes:   any of { firstName, lastName, gradeLevel, notes }
 //   returns: 200 student  |  400 { error }
-//   db:      Students.updateOne
+//   db:      Student.updateOne
 exports.updateStudent = async (req, res, next) => {
   try {
     const updates = pick(req.body, FIELDS);
@@ -77,11 +77,11 @@ exports.updateStudent = async (req, res, next) => {
 
 // DELETE /api/students/:studentId
 //   returns: 200 { message, deleted: { behaviors, sessions, events } }
-//   db:      deleteMany on BehaviorEvents, Sessions, Behaviors, then Students.deleteOne
+//   db:      deleteMany on BehaviorEvent, Session, Behavior, then Student.deleteOne
 //   (deletes everything under the student too so we don't leave orphaned data)
 exports.deleteStudent = async (req, res, next) => {
   try {
-    const filter = { StudentId: req.student._id, UserId: req.userId };
+    const filter = { studentId: req.student._id, userId: req.userId };
 
     const events = await BehaviorEvent.deleteMany(filter);
     const sessions = await Session.deleteMany(filter);
@@ -105,27 +105,27 @@ exports.deleteStudent = async (req, res, next) => {
 //   returns: 200 { student, sessions: [...], behaviors: [...] }
 //            for each session: minutes, count + rate per hour for each behavior,
 //            so the front end can graph progress over time
-//   db:      Sessions.find (StartTime in range), BehaviorEvents.find (for those sessions),
-//            Behaviors.find (all of them, archived ones too)
+//   db:      Session.find (startTime in range), BehaviorEvent.find (for those sessions),
+//            Behavior.find (all of them, archived ones too)
 exports.getSummary = async (req, res, next) => {
   try {
     const from = parseDate(req.query.from, 'from');
     const to = parseDate(req.query.to, 'to');
 
-    const sessionFilter = { StudentId: req.student._id, UserId: req.userId };
+    const sessionFilter = { studentId: req.student._id, userId: req.userId };
     if (from || to) {
-      sessionFilter.StartTime = {};
-      if (from) sessionFilter.StartTime.$gte = from;
-      if (to) sessionFilter.StartTime.$lte = to;
+      sessionFilter.startTime = {};
+      if (from) sessionFilter.startTime.$gte = from;
+      if (to) sessionFilter.startTime.$lte = to;
     }
 
-    const sessions = await Session.find(sessionFilter).sort({ StartTime: 1 }).lean();
+    const sessions = await Session.find(sessionFilter).sort({ startTime: 1 }).lean();
     const events = await BehaviorEvent.find({
-      SessionId: { $in: sessions.map((s) => s._id) },
-      UserId: req.userId
+      sessionId: { $in: sessions.map((s) => s._id) },
+      userId: req.userId
     }).lean();
-    const behaviors = await Behavior.find({ StudentId: req.student._id, UserId: req.userId })
-      .sort({ Code: 1 })
+    const behaviors = await Behavior.find({ studentId: req.student._id, userId: req.userId })
+      .sort({ code: 1 })
       .lean();
 
     res.status(200).json({ student: req.student, ...buildSummary(sessions, events, behaviors) });

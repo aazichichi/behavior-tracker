@@ -45,9 +45,9 @@ exports.sendVerificationEmail = (user, token, apiBase) => {
     : `${apiBase}/api/auth/verify-email?token=${token}`;
 
   return send(
-    user.Email,
+    user.email,
     'Verify your Behavior Tracker account',
-    `Hi ${user.FirstName},\n\nPlease confirm your email address by opening this link:\n${link}\n\n` +
+    `Hi ${user.firstName},\n\nPlease confirm your email address by opening this link:\n${link}\n\n` +
       "If you didn't create a Behavior Tracker account, you can ignore this email."
   );
 };
@@ -57,9 +57,9 @@ exports.sendPasswordResetEmail = (user, token) => {
   const link = `${base}/reset-password?token=${token}`;
 
   return send(
-    user.Email,
+    user.email,
     'Reset your Behavior Tracker password',
-    `Hi ${user.FirstName},\n\nTo choose a new password, open this link within 1 hour:\n${link}\n\n` +
+    `Hi ${user.firstName},\n\nTo choose a new password, open this link within 1 hour:\n${link}\n\n` +
       "If you didn't ask to reset your password, you can ignore this email. Your password won't change."
   );
 };

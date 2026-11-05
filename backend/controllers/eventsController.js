@@ -8,10 +8,10 @@ const CLOCK_SKEW_MS = 60 * 1000;
 
 // GET /api/sessions/:sessionId/events
 //   returns: 200 [event, ...] oldest first
-//   db:      BehaviorEvents.find({ SessionId })
+//   db:      BehaviorEvent.find({ sessionId })
 exports.listEvents = async (req, res, next) => {
   try {
-    const events = await BehaviorEvent.find({ SessionId: req.sessionDoc._id }).sort({ Timestamp: 1 });
+    const events = await BehaviorEvent.find({ sessionId: req.sessionDoc._id }).sort({ timestamp: 1 });
     res.status(200).json(events);
   } catch (err) {
     next(err);
@@ -22,13 +22,13 @@ exports.listEvents = async (req, res, next) => {
 //   takes:   { behaviorId, timestamp? }  timestamp defaults to right now. the app only
 //            needs to send it if the tap happened earlier (ex: recorded while offline)
 //   returns: 201 event  |  400 { error }  |  404 behavior not found  |  409 session ended / behavior archived
-//   db:      Behaviors.findOne({ _id, StudentId, UserId }), BehaviorEvents.insertOne
+//   db:      Behavior.findOne({ _id, studentId, userId }), BehaviorEvent.create
 exports.createEvent = async (req, res, next) => {
   try {
     const session = req.sessionDoc;
     const { behaviorId, timestamp } = req.body || {};
 
-    if (session.Status !== 'active') {
+    if (session.status !== 'active') {
       return res.status(409).json({ error: 'This session has ended, so no more events can be added' });
     }
 
@@ -38,28 +38,28 @@ exports.createEvent = async (req, res, next) => {
 
     const behavior = await Behavior.findOne({
       _id: String(behaviorId),
-      StudentId: session.StudentId,
-      UserId: req.userId
+      studentId: session.studentId,
+      userId: req.userId
     });
     if (!behavior) {
       return res.status(404).json({ error: 'Behavior not found for this student' });
     }
-    if (behavior.IsArchived) {
+    if (behavior.isArchived) {
       return res.status(409).json({ error: 'This behavior is archived' });
     }
 
     const when = parseDate(timestamp, 'timestamp') || new Date();
-    if (when < session.StartTime || when.getTime() > Date.now() + CLOCK_SKEW_MS) {
+    if (when < session.startTime || when.getTime() > Date.now() + CLOCK_SKEW_MS) {
       return res.status(400).json({ error: 'timestamp must be between the session start and now' });
     }
 
     const event = await BehaviorEvent.create({
-      SessionId: session._id,
-      StudentId: session.StudentId,
-      BehaviorId: behavior._id,
-      UserId: req.userId,
-      Timestamp: when,
-      IntervalIndex: intervalIndexFor(when, session.StartTime, session.IntervalSeconds)
+      sessionId: session._id,
+      studentId: session.studentId,
+      behaviorId: behavior._id,
+      userId: req.userId,
+      timestamp: when,
+      intervalIndex: intervalIndexFor(when, session.startTime, session.intervalSeconds)
     });
 
     res.status(201).location(`/api/events/${event._id}`).json(event);
@@ -76,7 +76,7 @@ exports.getEvent = (req, res) => {
 
 // DELETE /api/events/:eventId   (undo button for a mistaken tap)
 //   returns: 200 { message }
-//   db:      BehaviorEvents.deleteOne
+//   db:      BehaviorEvent.deleteOne
 exports.deleteEvent = async (req, res, next) => {
   try {
     await req.event.deleteOne();

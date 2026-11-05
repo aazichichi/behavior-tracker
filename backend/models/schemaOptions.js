@@ -14,5 +14,5 @@ exports.baseOptions = (collection) => ({
 // mongoose fills these two in automatically on create and save
 exports.withTimestamps = (collection) => ({
   ...exports.baseOptions(collection),
-  timestamps: { createdAt: 'DateCreated', updatedAt: 'DateUpdated' }
+  timestamps: { createdAt: 'dateCreated', updatedAt: 'dateUpdated' }
 });
