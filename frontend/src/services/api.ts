@@ -78,7 +78,7 @@ export const apiService = {
     return response.data;
   },
 
-  addOrUpdateBehavior: async (behaviorData: any, studentId: string): Promise<Behavior> => {
+  addOrUpdateBehavior: async (behaviorData: any): Promise<Behavior> => {
     
     const response = await API.post(`/students/${behaviorData.studentId}/behaviors`, behaviorData);
     return response.data;
@@ -96,13 +96,13 @@ export const apiService = {
     return response.data;
   },
 
-  logBehaviorEvent: async (eventData: any): Promise<BehaviorEvent> => {
+  logBehaviorEvent: async (eventData: any, sessionId: string): Promise<BehaviorEvent> => {
     const response = await API.post(`/sessions/${sessionId}/events`, eventData);
     return response.data;
   },
 
   endSession: async (id: string, notes: string): Promise<any> => {
-    const response = await API.put(`/sessions/${id}/end`, { notes });
+    const response = await API.patch(`/sessions/${id}`, { notes: notes, status: 'ended' });
     return response.data;
   },
 

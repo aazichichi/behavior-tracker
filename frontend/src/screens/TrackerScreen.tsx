@@ -79,7 +79,7 @@ export default function TrackerScreen({ route, navigation }: any) {
     };
 
     setEventHistory(prev => [newEvent, ...prev]);
-    await apiService.logBehaviorEvent(newEvent);
+    await apiService.logBehaviorEvent(newEvent, activeSessionRef.current._id);
   };
 
   const handleEndSession = async () => {

@@ -44,10 +44,12 @@ exports.startSession = async (req, res, next) => {
       status: 'active'
     });
     if (active) {
-      return res.status(409).json({
-        error: 'This student already has an active session. End it before starting another.',
-        activeSessionId: active._id
-      });
+      // return res.status(409).json({
+      //   error: 'This student already has an active session. End it before starting another.',
+      //   activeSessionId: active._id
+      // });
+
+      res.status(200).location(`/api/sessions/${active._id}`).json(active);
     }
 
     const { intervalSeconds, notes } = req.body || {};
