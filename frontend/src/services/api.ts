@@ -2,7 +2,7 @@ import axios from 'axios';
 import { User, Student, Session, Behavior, BehaviorEvent } from '../types';
 
 // Replace the top API_URL definition string with this fallback structure:
-const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || 'https://mernbehvaiortracker.xyz/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || 'https://mernbehvaiortracker.xyz:5000/api';
 
 // Create an isolated instance of axios for consistent base URL routing
 const API = axios.create({
