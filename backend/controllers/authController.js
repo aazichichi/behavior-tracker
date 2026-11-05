@@ -197,31 +197,31 @@ exports.register = async (req, res, next) => {
     await newUser.save();
 
 
-        // 4. SAVE THE STUDENT (Implicitly linked to the teacher via userId)
-    if (student && (student.firstName || student.FirstName || student.studentFirstName)) {
-      const newStudent = new Student({
-        firstName: student.firstName || student.FirstName || student.studentFirstName,
-        lastName: student.lastName || student.LastName || student.studentLastName,
-        gradeLevel: student.gradeLevel || student.GradeLevel,
-        notes: student.notes || student.Notes,
-        userId: newUser._id // Links the student record directly to this teacher's account ID
-      });
-      await newStudent.save();
-    }
+    //     // 4. SAVE THE STUDENT (Implicitly linked to the teacher via userId)
+    // if (student && (student.firstName || student.FirstName || student.studentFirstName)) {
+    //   const newStudent = new Student({
+    //     firstName: student.firstName || student.FirstName || student.studentFirstName,
+    //     lastName: student.lastName || student.LastName || student.studentLastName,
+    //     gradeLevel: student.gradeLevel || student.GradeLevel,
+    //     notes: student.notes || student.Notes,
+    //     userId: newUser._id // Links the student record directly to this teacher's account ID
+    //   });
+    //   await newStudent.save();
+    // }
 
-    // 5. BATCH SAVE THE TRACKING MATRIX BEHAVIORS
-    if (behaviorsList && behaviorsList.length > 0) {
-      const behaviorDocs = behaviorsList.map(b => ({
-        name: b.name || b.Name,
-        code: b.code || b.Code,
-        description: b.description || b.Description,
-        color: b.color || b.Color || '#E4572E',
-        userId: newUser._id // Links the behavior metric definition directly to this teacher's account ID
-      }));
-      await Behavior.insertMany(behaviorDocs);
-    }
+    // // 5. BATCH SAVE THE TRACKING MATRIX BEHAVIORS
+    // if (behaviorsList && behaviorsList.length > 0) {
+    //   const behaviorDocs = behaviorsList.map(b => ({
+    //     name: b.name || b.Name,
+    //     code: b.code || b.Code,
+    //     description: b.description || b.Description,
+    //     color: b.color || b.Color || '#E4572E',
+    //     userId: newUser._id // Links the behavior metric definition directly to this teacher's account ID
+    //   }));
+    //   await Behavior.insertMany(behaviorDocs);
+    // }
 
-    newUser.password = undefined;
+    // newUser.password = undefined;
 
     res.status(201).json({ 
       token: createToken(newUser), 

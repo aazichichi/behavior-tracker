@@ -6,3 +6,7 @@ variables:
     value: jrivera
   - name: password
     value: Password123!
+  - name: newPassword
+    value: password123
+  - name: newLogin
+    value: testteacher

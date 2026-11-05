@@ -43,7 +43,7 @@ export default function RegisterOnboardingScreen({ navigation }: any) {
           <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#a4b0be" value={teacher.email} onChangeText={t => setTeacher({...teacher, email: t})} autoCapitalize="none" keyboardType="email-address" />
           <TextInput style={styles.input} placeholder="Username" placeholderTextColor="#a4b0be" value={teacher.username} onChangeText={t => setTeacher({...teacher, username: t})} autoCapitalize="none" />
           <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#a4b0be" value={teacher.password} onChangeText={t => setTeacher({...teacher, password: t})} secureTextEntry={true} autoCapitalize="none"/>
-          <TouchableOpacity style={styles.btn} onPress={() => setStep(2)}><Text style={styles.btnTxt}>Next Step: Setup Student Profile</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.btn} onPress={handleFinalSubmit}><Text style={styles.btnTxt}>Register Account</Text></TouchableOpacity>
         </View>
       )}
 
