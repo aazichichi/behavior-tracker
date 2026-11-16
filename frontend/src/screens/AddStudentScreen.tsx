@@ -16,10 +16,15 @@ export default function AddStudentScreen({ route, navigation }: any) {
 
   const handleSaveStudent = async () => {
     // If validation is needed, check student.firstName now
-    // if (!student.firstName) return Alert.alert('Error', 'Name is a mandatory property field.');
+    if (!student.firstName) return Alert.alert('Error', 'Name is a mandatory property field.');
     
-    // Aligned to match apiService.addStudentToTeacher(studentData) definition from api.ts
-    await apiService.addStudentToTeacher(student);
+    // Aligned to match apiService.addStudentToTeacher(studentData, behaviors) definition from api.ts
+    const data = await apiService.addStudentToTeacher(student);
+
+    behaviors.forEach((behaviorData) => {
+      apiService.addOrUpdateBehavior({...behaviorData, studentId : data._id, userId: 'u1'});
+    });
+
     Alert.alert('Success', 'Student file setup added to workspace directory maps.');
     navigation.navigate('Dashboard', { refresh: true });
   };
