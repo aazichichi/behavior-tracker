@@ -6,9 +6,11 @@ import { apiService } from '../services/api';
 export default function LoginScreen({ navigation }: any) {
   const [loginInput, setLoginInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSignIn = async () => {
     if (!loginInput.trim() || !passwordInput.trim()) {
+      setErrorMessage('Please provide both your account username and password.');
       return Alert.alert('Fields Required', 'Please provide both your account username and password.');
     }
     
@@ -16,6 +18,7 @@ export default function LoginScreen({ navigation }: any) {
     const user = await apiService.login(loginInput, passwordInput);
     
     if (!user) {
+      setErrorMessage('Invalid username and password combination');
       return Alert.alert('Authentication Failed', 'Invalid username or password combination.');
     }
     
@@ -32,6 +35,8 @@ export default function LoginScreen({ navigation }: any) {
       <View style={styles.formWrapper}>
         <Text style={styles.branding}>📋 Behavior Tracker</Text>
         <Text style={styles.subtext}>Applied Behavioral Analysis Tracking App</Text>
+
+        <Text style={styles.errorText}>{errorMessage}</Text>
       
         {/* Username Token Entry */}
         <TextInput 
@@ -82,5 +87,6 @@ const styles = StyleSheet.create({
   ctaText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   onboardLink: { marginTop: 25, alignItems: 'center' },
   onboardLinkText: { color: '#4A90E2', fontWeight: '600', fontSize: 13, textAlign: 'center' },
-  forgotText: { textAlign: 'center', color: '#a4b0be', marginTop: 15, textDecorationLine: 'underline', fontSize: 13 }
+  forgotText: { textAlign: 'center', color: '#a4b0be', marginTop: 15, textDecorationLine: 'underline', fontSize: 13 },
+  errorText: {color: '#ff0000', fontWeight: 'bold', textAlign: 'center', margin: 5}
 });
