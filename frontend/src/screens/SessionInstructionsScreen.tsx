@@ -46,7 +46,7 @@ export default function SessionInstructionsScreen({ route, navigation }: any) {
                   Tap "End Session" when finished to review interval totals and view the session summary.
                 </Text>
               </View>
-            <View>
+            </View>
         </View>
       </ScrollView>
 
@@ -55,7 +55,7 @@ export default function SessionInstructionsScreen({ route, navigation }: any) {
          <TouchableOpacity style={styles.startBtn} onPress={handleStartSession}>
               <Text style={styles.startBtnText}>Start Session</Text>
             </TouchableOpacity>
-        <View>
+        </View>
       </View>
     </View>
   );
