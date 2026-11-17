@@ -40,8 +40,14 @@ export default function StudentDashboard({ route, navigation }: any) {
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            {/* Updated parameters to match camelCase values from your updated Types schema mapping */}
-            <TouchableOpacity style={styles.drillZone} onPress={() => navigation.navigate('Tracker', { studentId: item._id, firstName: item.firstName })}>
+            {/* Updated to navigate to SessionInstructions first */}
+            <TouchableOpacity 
+              style={styles.drillZone} 
+              onPress={() => navigation.navigate('SessionInstructions', { 
+                studentId: item._id, 
+                firstName: item.firstName 
+              })}
+            >
               <Text style={styles.name}>{item.firstName} {item.lastName}</Text>
               <Text style={styles.sub}>Grade Level: {item.gradeLevel}</Text>
               <Text style={styles.notes} numberOfLines={1}>{item.notes}</Text>

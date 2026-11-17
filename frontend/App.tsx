@@ -11,6 +11,7 @@ import EditBehaviorsScreen from './src/screens/EditBehaviorsScreen';
 import TrackerScreen from './src/screens/TrackerScreen';
 import SessionSummaryScreen from './src/screens/SessionSummaryScreen';
 import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
+import SessionInstructionsScreen from './src/screens/SessionInstructionsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,6 +35,7 @@ export default function App() {
         <Stack.Screen name="Tracker" component={TrackerScreen} options={{ title: 'Interval Session' }} />
         <Stack.Screen name="SessionSummary" component={SessionSummaryScreen} options={{ title: 'Session Summary Matrix' }} />
         <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} options={{ title: 'System Administration Control', headerLeft: () => null }} />
+        <Stack.Screen name="SessionInstructions" component={SessionInstructionsScreen} options={{ title: 'Session Instructions' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
