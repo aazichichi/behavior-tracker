@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { User, Student, Session, Behavior, BehaviorEvent } from '../types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Replace the top API_URL definition string with this fallback structure:
-const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || 'http://172.19.2.66:5000/api' || 'http://localhost:5000/api';
 
 // Create an isolated instance of axios for consistent base URL routing
 const API = axios.create({
@@ -13,8 +14,8 @@ const API = axios.create({
 });
 
 // Axios interceptor to automatically attach authorization tokens to protected routes
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+API.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('token');
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -29,7 +30,7 @@ export const apiService = {
       const response = await API.post('/auth/login', { login: username, password: password });
       
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+        await AsyncStorage.setItem('token', response.data.token);
       }
       return response.data.user;
     } catch (error) {
@@ -45,7 +46,7 @@ export const apiService = {
       behaviorsList: behaviorsList, // <-- Changed from behaviors to behaviorsList to match authController.js
     });
     if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
+      await AsyncStorage.setItem('token', response.data.token);
     }
     return response.data.user;
   },
